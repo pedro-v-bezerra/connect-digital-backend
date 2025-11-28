@@ -1,42 +1,39 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
-  }
+  async create(@Body() dto: CreateOrderDto) {
+    const order = await this.ordersService.create(dto);
 
-  @Get()
-  findAll() {
-    return this.ordersService.findAll();
+    return {
+      id: order.id,
+      status: order.status,
+      pix: order.pix,
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+  getStatus(@Param('id') id: string) {
+    const order = this.ordersService.findOne(id);
+
+    return {
+      id: order.id,
+      status: order.status,
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
-  }
+  @Post(':id/confirm')
+  async confirm(@Param('id') id: string) {
+    const order = await this.ordersService.confirmPayment(id);
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
+    return {
+      id: order.id,
+      status: order.status,
+    };
   }
 }

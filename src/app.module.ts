@@ -1,12 +1,21 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { OrdersModule } from './orders/orders.module';
+import { AbacatePayService } from './integrations/abacatepay.service';
+import { EvolutionService } from './integrations/evolution.service';
 
-const x = 1;
 @Module({
-  imports: [OrdersModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    HttpModule,
+    OrdersModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AbacatePayService, EvolutionService],
 })
 export class AppModule {}
