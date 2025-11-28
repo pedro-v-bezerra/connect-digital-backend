@@ -20,3 +20,10 @@ export interface Order {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface Customer {
+  name: string;
+  email: string;
+  taxId: string;
+  phone: string;
+}
