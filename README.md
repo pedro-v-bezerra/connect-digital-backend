@@ -1,98 +1,195 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Back-end – Connect Digital
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API responsável pela criação e acompanhamento de pedidos, integração com o fluxo de pagamento (Pix/AbacatePay) e comunicação com serviços externos (como Evolution).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> ℹ️ Este README é específico do **back-end**.  
+> Para detalhes da interface web, consulte o [README do front-end](https://github.com/pedro-v-bezerra/connect-digital-frontend).
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🚀 Tecnologias principais
 
-## Project setup
+- **NestJS 11** – Framework Node.js modular e opinativo, ideal para construir APIs escaláveis.
+- **@nestjs/axios + Axios** – Cliente HTTP para comunicação com gateways externos (Evolution, AbacatePay).
+- **@nestjs/config** – Gerenciamento centralizado de variáveis de ambiente.
+- **class-validator + class-transformer** – Validação e transformação de DTOs.
+- **RxJS** – Abstrações reativas utilizadas internamente pelo NestJS.
 
-```bash
-$ npm install
+---
+
+## 🛠️ Ferramentas de desenvolvimento
+
+- **TypeScript** – Tipagem estática para maior segurança e legibilidade do código.
+- **ESLint + Prettier** – Padronização de código e formatação automática.
+- **Husky + lint-staged** – Execução de linters e formatadores antes dos commits.
+- **Nest CLI** – Geração de módulos, services, controllers e estrutura de projeto.
+- **Swagger** – Documentação das rotas e DTO's definidos.
+
+---
+
+## 📎 Requisitos
+
+Certifique-se de ter as seguintes ferramentas instaladas:
+
+| Ferramenta     | Versão recomendada |
+|----------------|--------------------|
+| **Node.js**    | >= 22.x            |
+| **npm ou yarn**| Última versão estável |
+
+> O projeto foi desenvolvido e testado com Node 22.11.0.
+
+---
+
+## 🔐 Variáveis de ambiente
+
+Dados sensíveis (como **API key da Evolution** e **chave da AbacatePay**) **não** estão hardcoded no código.  
+Eles são carregados via arquivo `.env` e acessados através do `@nestjs/config`.
+
+Na pasta `backend`, crie um arquivo **`.env`** com, por exemplo:
+
+```env
+# Porta da API
+PORT=3001
+
+# Evolution
+EVOLUTION_API_KEY=sua_chave_da_evolution
+EVOLUTION_BASE_URL=sua_url_da_evolution
+EVOLUTION_INSTANCE_NAME=seu_nome_da_instancia
+
+# AbacatePay
+ABACATEPAY_API_KEY=sua_chave_da_abacatepay_aqui
+ABACATEPAY_BASE_URL=https://api.abacatepay.com.br
 ```
 
-## Compile and run the project
+---
+
+## ▶️ Instruções para execução
+
+1.**Instalar dependências**
+
+Na raiz do projeto:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+2.**Configurar o** ```.env```
+
+Garanta que o arquivo .env exista na raiz do backend, conforme o exemplo da seção anterior ou arquivo .env.example na raiz do repositório.
+
+3.**Rodar em modo desenvolvimento**
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+nest start
 ```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+ou
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+A API ficará disponível em (por exemplo):
 
-## Resources
+```text
+http://localhost:3001
+```
+O front-end irá consumir essa API. Veja o [README do front-end](https://github.com/pedro-v-bezerra/connect-digital-frontend) para configurar NEST_API_URL.
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 📡 Endpoints (resumo)
 
-## Support
+Este é um resumo das rotas. Após rodar a aplicação, veja a documentação completa em [/api-docs#](http://localhost:3001/api-docs#/).
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+1.**Criar pedido**
 
-## Stay in touch
+```http
+POST /orders
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Body (exemplo):
 
-## License
+```JSON
+{
+  "customerName": "Fulano",
+  "email": "fulano@hotmail.com",
+  "cpf": "999.999.999-99",
+  "phone": "55999999999",
+  "amount": 10000, //em centavos
+  "address": "Rua 1, Lote 5",
+  "productName": "Teste"
+}
+```
+Resposta (exemplo):
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```JSON
+{
+  "orderId": "123",
+  "status": "pending",
+  "pix": {
+    "copyPasteKey": "0002010...",
+    "qrCodeImageUrl": "data:image/png;base64..."
+  }
+}
+```
+
+2.**Consultar pedido**
+
+```http
+GET /orders/:id/status
+```
+
+Resposta (exemplo):
+
+```JSON
+{
+  "orderId": "123",
+  "status": "PENDING",
+  "expiresAt": "2025-11-29T16:03:37.096Z"
+}
+```
+
+3.**Simular pagamento**
+
+Essa rota foi criada com o intuito de facilitar a simulação do pagamento.
+```http
+POST /orders/:id/simulate-payment
+```
+
+Resposta (exemplo):
+
+```JSON
+{
+  "orderId": "123",
+  "status": "PAID",
+  "expiresAt": "2025-11-29T16:03:37.096Z"
+}
+```
+
+---
+
+## 📦 Bibliotecas utilizadas
+
+### Dependências principais
+
+| Biblioteca     | Motivo da escolha |
+|----------------|--------------------|
+| **@nestjs/common/core**    | Núcleo do NestJS, responsável pela arquitetura modular e injeção de dependências.            |
+| **@nestjs/platform-express**| Adaptação HTTP baseada em Express, simples e consolidada. |
+| **@nestjs/axios + axios**| Cliente HTTP para chamadas às APIs da Evolution e AbacatePay.|
+| **@nestjs/config**| Gerenciamento centralizado das variáveis de ambiente (.env). |
+| **class-validator**| Validação declarativa de DTOs (body, params, query). |
+| **class-transformer**| Transformação de objetos (por exemplo, conversão de payloads em classes). |
+| **rxjs**| Integrações reativas internas do NestJS. |
+
+---
+
+### 💡 Possíveis melhorias e próximos passos
+- Implementar testes unitários e de integração cobrindo regras de negócio críticas.
+- Adicionar logs estruturados (ex.: para integrações com Evolution e AbacatePay).
+- Implementar mecanismos de retry/backoff em caso de falha nos gateways externos.
+- Expor documentação da API (ex.: Swagger/OpenAPI).
+- Introduzir camada de persistência (banco de dados) para histórico mais completo de pedidos e notificações de pagamento.
+
+---
+
+#### Desenvolvido por Pedro Victor Lima
