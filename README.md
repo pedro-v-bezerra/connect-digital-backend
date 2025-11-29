@@ -53,12 +53,12 @@ PORT=3001
 
 # Evolution
 EVOLUTION_API_KEY=sua_chave_da_evolution
-EVOLUTION_BASE_URL=sua_url_da_evolution
+EVOLUTION_BASE_URL=sua_url_da_evolution #sem '/' no final
 EVOLUTION_INSTANCE_NAME=seu_nome_da_instancia
 
 # AbacatePay
 ABACATEPAY_API_KEY=sua_chave_da_abacatepay_aqui
-ABACATEPAY_BASE_URL=https://api.abacatepay.com.br
+ABACATEPAY_BASE_URL=https://api.abacatepay.com
 ```
 
 ---
