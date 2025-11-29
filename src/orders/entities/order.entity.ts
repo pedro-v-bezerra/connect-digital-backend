@@ -9,7 +9,7 @@ export interface Order {
   productName: string;
   amount: number; // em centavos
   address: string;
-  status: OrderStatus; // 'pending' | 'paid'
+  status: OrderStatus;
   pixId: string;
   pixExpiresAt: string;
 }

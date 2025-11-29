@@ -34,7 +34,7 @@ interface AbacatePixChargeResponse {
 }
 
 export interface AbacatePixStatusData {
-  status: string; // ex: 'PENDING', 'PAID'
+  status: string;
   expiresAt: string;
 }
 

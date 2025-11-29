@@ -17,7 +17,7 @@ interface EvolutionMessageKey {
 export interface EvolutionSendTextResponse {
   key: EvolutionMessageKey;
   pushName: string | null;
-  status: string; // ex: 'PENDING', 'SENT', etc.
+  status: string;
   message: {
     conversation?: string;
     [key: string]: any;
