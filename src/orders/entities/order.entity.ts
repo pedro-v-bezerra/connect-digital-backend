@@ -1,11 +1,5 @@
 export type OrderStatus = 'pending' | 'paid';
 
-export interface PixInfo {
-  txid: string;
-  copyPasteKey: string;
-  qrCodeImageUrl?: string;
-}
-
 export interface Order {
   id: string;
   customerName: string;
@@ -13,17 +7,23 @@ export interface Order {
   cpf: string;
   phone: string;
   productName: string;
-  amount: number; // em centavos (10000 = R$ 100,00)
+  amount: number; // em centavos
   address: string;
-  status: OrderStatus;
-  pix: PixInfo;
-  createdAt: Date;
-  updatedAt: Date;
+  status: OrderStatus; // 'pending' | 'paid'
+  pixId: string;
+  pixExpiresAt: string;
 }
 
 export interface Customer {
   name: string;
   email: string;
   taxId: string;
-  phone: string;
+  cellphone: string;
+}
+
+export interface PixInfo {
+  pixId: string;
+  copyPasteKey: string;
+  qrCodeImageUrl: string;
+  expiresAt: string;
 }

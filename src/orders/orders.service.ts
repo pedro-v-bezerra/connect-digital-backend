@@ -1,9 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { AbacatePayService } from '../integrations/abacatepay.service';
+import {
+  AbacatePayService,
+  CreatePixChargeResult,
+} from '../integrations/abacatepay.service';
 import { EvolutionService } from '../integrations/evolution.service';
-import { Order } from './entities/order.entity';
+import { Order, PixInfo } from './entities/order.entity';
+import { buildPendingMessage } from './messages/pending.message';
+import { buildPaidMessage } from './messages/paid.message';
 
 @Injectable()
 export class OrdersService {
@@ -14,17 +19,30 @@ export class OrdersService {
     private readonly evolution: EvolutionService,
   ) {}
 
-  async create(dto: CreateOrderDto): Promise<Order> {
-    const pix = await this.abacatePay.createPixCharge({
-      amount: dto.amount,
-      description: dto.productName,
-    });
+  private getOrderOrThrow(orderId: string): Order {
+    const order = this.orders.get(orderId);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return order;
+  }
 
-    const now = new Date();
-    const id = randomUUID();
+  async create(dto: CreateOrderDto): Promise<{ order: Order; pix: PixInfo }> {
+    const pixCharge: CreatePixChargeResult =
+      await this.abacatePay.createPixCharge({
+        amount: dto.amount,
+        expiresIn: 600,
+        description: dto.productName,
+        customer: {
+          name: dto.customerName,
+          email: dto.email,
+          taxId: dto.cpf,
+          cellphone: dto.phone,
+        },
+      });
 
     const order: Order = {
-      id,
+      id: randomUUID(),
       customerName: dto.customerName,
       email: dto.email,
       cpf: dto.cpf,
@@ -33,60 +51,64 @@ export class OrdersService {
       amount: dto.amount,
       address: dto.address,
       status: 'pending',
-      pix,
-      createdAt: now,
-      updatedAt: now,
+      pixId: pixCharge.pixId,
+      pixExpiresAt: pixCharge.expiresAt,
     };
 
-    this.orders.set(id, order);
+    this.orders.set(order.id, order);
 
-    await this.evolution.sendTextMessage({
-      to: order.phone,
-      message: this.buildPendingMessage(order),
-    });
+    const pix: PixInfo = {
+      pixId: pixCharge.pixId,
+      copyPasteKey: pixCharge.copyPasteKey,
+      qrCodeImageUrl: pixCharge.qrCodeImageUrl,
+      expiresAt: pixCharge.expiresAt,
+    };
 
-    return order;
-  }
+    const pendingMessage = buildPendingMessage(order, pix.copyPasteKey);
 
-  findOne(id: string): Order {
-    const order = this.orders.get(id);
-    if (!order) {
-      throw new NotFoundException('Order not found');
+    try {
+      await this.evolution.sendText(order.phone, pendingMessage);
+    } catch (err) {
+      console.error('Erro ao enviar mensagem pendente', err);
     }
-    return order;
+
+    return { order, pix };
   }
 
-  markAsPaid(id: string): Order {
-    const order = this.findOne(id);
-    order.status = 'paid';
-    order.updatedAt = new Date();
-    this.orders.set(id, order);
-    return order;
+  async checkStatus(orderId: string) {
+    const order = this.getOrderOrThrow(orderId);
+
+    const payment = await this.abacatePay.getPixStatus(order.pixId);
+
+    if (payment.status === 'PAID' && order.status !== 'paid') {
+      order.status = 'paid';
+      const paidMessage = buildPaidMessage();
+
+      try {
+        await this.evolution.sendText(order.phone, paidMessage);
+      } catch (err) {
+        console.error('Erro ao enviar mensagem de pagamento confirmado', err);
+      }
+    }
+
+    return {
+      orderId: order.id,
+      status: payment.status,
+      expiresAt: payment.expiresAt,
+    };
   }
 
-  async confirmPayment(id: string): Promise<Order> {
-    const order = this.markAsPaid(id);
+  async simulatePayment(orderId: string) {
+    const order = this.getOrderOrThrow(orderId);
 
-    await this.evolution.sendTextMessage({
-      to: order.phone,
-      message: 'Obrigado por comprar conosco!',
-    });
+    await this.abacatePay.simulatePayment(order.pixId);
 
-    return order;
-  }
+    const payment = await this.abacatePay.getPixStatus(order.pixId);
 
-  private buildPendingMessage(order: Order): string {
-    const amountReais = (order.amount / 100).toFixed(2).replace('.', ',');
-
-    return (
-      `Olá ${order.customerName} aqui é da LOJA X, recebemos o seu pedido e está quase tudo pronto para o envio!\n` +
-      `Precisamos apenas da confirmação do pagamento.\n\n` +
-      `Detalhes do pedido:\n` +
-      `• ${order.productName}\n` +
-      `• R$ ${amountReais}\n` +
-      `• ${order.address}\n\n` +
-      `Pague agora mesmo com o PIX copia e cola abaixo e garanta o seu pedido antes que acabem as últimas unidades:\n` +
-      `${order.pix.copyPasteKey}`
-    );
+    return {
+      orderId: order.id,
+      status: payment.status,
+      expiresAt: payment.expiresAt,
+    };
   }
 }

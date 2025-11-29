@@ -8,10 +8,25 @@ interface SendTextMessageParams {
   message: string;
 }
 
-interface EvolutionSendTextResponse {
-  success: boolean;
-  messageId?: string;
-  error?: string;
+interface EvolutionMessageKey {
+  remoteJid: string;
+  fromMe: boolean;
+  id: string;
+}
+
+export interface EvolutionSendTextResponse {
+  key: EvolutionMessageKey;
+  pushName: string | null;
+  status: string; // ex: 'PENDING', 'SENT', etc.
+  message: {
+    conversation?: string;
+    [key: string]: any;
+  };
+  contextInfo?: any;
+  messageType: string;
+  messageTimestamp: number;
+  instanceId: string;
+  source: string;
 }
 
 @Injectable()
@@ -35,7 +50,6 @@ export class EvolutionService {
   ): Promise<EvolutionSendTextResponse> {
     const url = `${this.baseUrl}/message/sendText/${this.instance}`;
 
-    // Aqui usamos o tipo correto
     const response$ = this.http.post<EvolutionSendTextResponse>(
       url,
       {
@@ -51,8 +65,15 @@ export class EvolutionService {
     );
 
     const { data } = await firstValueFrom(response$);
-    this.logger.debug(`WhatsApp enviado para ${params.to}`);
+
+    this.logger.debug(
+      `WhatsApp enviado para ${params.to} (status: ${data.status}, msgId: ${data.key?.id})`,
+    );
 
     return data;
+  }
+
+  async sendText(to: string, message: string): Promise<void> {
+    await this.sendTextMessage({ to, message });
   }
 }

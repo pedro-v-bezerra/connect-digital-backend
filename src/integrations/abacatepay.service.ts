@@ -33,14 +33,23 @@ interface AbacatePixChargeResponse {
   };
 }
 
-interface CreatePixChargeResult {
-  txid: string;
-  copyPasteKey: string;
-  qrCodeImageUrl?: string;
+export interface AbacatePixStatusData {
+  status: string; // ex: 'PENDING', 'PAID'
+  expiresAt: string;
 }
 
 interface AbacatePixStatusResponse {
-  status: string;
+  data: AbacatePixStatusData;
+  error: null | {
+    message: string;
+    code?: string;
+  };
+}
+
+export interface CreatePixChargeResult {
+  pixId: string;
+  copyPasteKey: string;
+  qrCodeImageUrl: string;
   expiresAt: string;
 }
 
@@ -60,7 +69,7 @@ export class AbacatePayService {
   async createPixCharge(
     params: CreatePixChargeParams,
   ): Promise<CreatePixChargeResult> {
-    const url = `${this.baseUrl}/pix/charges`;
+    const url = `${this.baseUrl}/v1/pixQrCode/create`;
 
     const response$ = this.http.post<AbacatePixChargeResponse>(
       url,
@@ -82,22 +91,44 @@ export class AbacatePayService {
     const { data } = await firstValueFrom(response$);
 
     if (data.error) {
+      const err = data.error;
       throw new Error(
-        `Erro ao criar cobrança PIX: ${data.error.message} (${data.error.code ?? 'SEM_CODIGO'})`,
+        `Erro ao criar cobrança PIX: ${err.message} (${err.code ?? 'SEM_CODIGO'})`,
       );
     }
 
     const charge = data.data;
 
     return {
-      txid: charge.id,
+      pixId: charge.id,
       copyPasteKey: charge.brCode,
       qrCodeImageUrl: charge.brCodeBase64,
+      expiresAt: charge.expiresAt,
     };
   }
 
-  async simulatePayment(chargeId: string): Promise<AbacatePixChargeData> {
-    const url = `${this.baseUrl}/pix/charges/${chargeId}/simulate`;
+  async getPixStatus(pixId: string): Promise<AbacatePixStatusData> {
+    const url = `${this.baseUrl}/v1/pixQrCode/check?id=${pixId}`;
+
+    const response$ = this.http.get<AbacatePixStatusResponse>(url, {
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+    });
+
+    const { data } = await firstValueFrom(response$);
+
+    if (data.error) {
+      throw new Error(
+        `Erro ao buscar status PIX: ${data.error.message} (${data.error.code ?? 'SEM_CODIGO'})`,
+      );
+    }
+
+    return data.data;
+  }
+
+  async simulatePayment(pixId: string): Promise<void> {
+    const url = `${this.baseUrl}/v1/pixQrCode/simulate-payment?id=${pixId}`;
 
     const response$ = this.http.post<AbacatePixChargeResponse>(
       url,
@@ -105,6 +136,7 @@ export class AbacatePayService {
       {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
         },
       },
     );
@@ -116,21 +148,5 @@ export class AbacatePayService {
         `Erro ao simular pagamento PIX: ${data.error.message} (${data.error.code ?? 'SEM_CODIGO'})`,
       );
     }
-
-    return data.data;
-  }
-
-  async verifyPayment(chargeId: string): Promise<AbacatePixStatusResponse> {
-    const url = `${this.baseUrl}/pixQrCode/check?id=${chargeId}`;
-
-    const response$ = this.http.get<{ data: AbacatePixStatusResponse }>(url, {
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-    });
-
-    const { data } = await firstValueFrom(response$);
-
-    return data.data;
   }
 }

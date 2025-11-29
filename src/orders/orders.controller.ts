@@ -8,32 +8,38 @@ export class OrdersController {
 
   @Post()
   async create(@Body() dto: CreateOrderDto) {
-    const order = await this.ordersService.create(dto);
+    const { order, pix } = await this.ordersService.create(dto);
 
     return {
-      id: order.id,
+      orderId: order.id,
       status: order.status,
-      pix: order.pix,
+      pix: {
+        copyPasteKey: pix.copyPasteKey,
+        qrCodeImageUrl: pix.qrCodeImageUrl,
+        expiresAt: pix.expiresAt,
+      },
     };
   }
 
-  @Get(':id')
-  getStatus(@Param('id') id: string) {
-    const order = this.ordersService.findOne(id);
+  @Get(':id/status')
+  async getStatus(@Param('id') id: string) {
+    const payment = await this.ordersService.checkStatus(id);
 
     return {
-      id: order.id,
-      status: order.status,
+      orderId: payment.orderId,
+      status: payment.status,
+      expiresAt: payment.expiresAt,
     };
   }
 
-  @Post(':id/confirm')
-  async confirm(@Param('id') id: string) {
-    const order = await this.ordersService.confirmPayment(id);
+  @Post(':id/simulate-payment')
+  async simulatePayment(@Param('id') id: string) {
+    const result = await this.ordersService.simulatePayment(id);
 
     return {
-      id: order.id,
-      status: order.status,
+      orderId: result.orderId,
+      status: result.status,
+      expiresAt: result.expiresAt,
     };
   }
 }
