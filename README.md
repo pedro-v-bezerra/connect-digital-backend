@@ -67,17 +67,17 @@ ABACATEPAY_BASE_URL=https://api.abacatepay.com
 
 1. **Clone o repositório**
    
-  Na pasta onde desejar:
+Na pasta onde desejar:
 
-  ```bash
-   git clone https://github.com/pedro-v-bezerra/connect-digital-backend.git
-  ```
+```bash
+git clone https://github.com/pedro-v-bezerra/connect-digital-backend.git
+```
 
-  Navegue para a pasta (os comando a seguir serão sempre nesse caminho)
+Navegue para a pasta (os comando a seguir serão sempre nesse caminho)
 
-  ```bash
-   cd connect-digital-backend
-   ```
+```bash
+cd connect-digital-backend
+```
 
 2.**Instalar dependências**
 
