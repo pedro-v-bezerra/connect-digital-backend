@@ -65,7 +65,7 @@ ABACATEPAY_BASE_URL=https://api.abacatepay.com
 
 ## ▶️ Instruções para execução
 
-1. **Clone o repositório**
+1.**Clone o repositório**
    
 Na pasta onde desejar:
 
