@@ -65,7 +65,21 @@ ABACATEPAY_BASE_URL=https://api.abacatepay.com
 
 ## ▶️ Instruções para execução
 
-1.**Instalar dependências**
+1. **Clone o repositório**
+   
+  Na pasta onde desejar:
+
+  ```bash
+   git clone https://github.com/pedro-v-bezerra/connect-digital-backend.git
+  ```
+
+  Navegue para a pasta (os comando a seguir serão sempre nesse caminho)
+
+  ```bash
+   cd connect-digital-backend
+   ```
+
+2.**Instalar dependências**
 
 Na raiz do projeto:
 
@@ -73,11 +87,11 @@ Na raiz do projeto:
 npm install
 ```
 
-2.**Configurar o** ```.env```
+3.**Configurar o** ```.env```
 
 Garanta que o arquivo .env exista na raiz do backend, conforme o exemplo da seção anterior ou arquivo .env.example na raiz do repositório.
 
-3.**Rodar em modo desenvolvimento**
+4.**Rodar em modo desenvolvimento**
 
 ```bash
 nest start
